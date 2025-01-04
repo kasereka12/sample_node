@@ -1,60 +1,43 @@
-let express = require('express');
-let app = express();
-let bodyParser = require('body-parser');
-let student = require('./routes/students');
-let course = require('./routes/courses');
-let grade = require('./routes/grades');
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const bodyParser = require('body-parser');
 
-let mongoose = require('mongoose');
-mongoose.Promise = global.Promise;
-//mongoose.set('debug', true);
+const app = express();
 
-// TODO remplacer toute cette chaine par l'URI de connexion à votre propre base dans le cloud
-const uri = '...';
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-const options = {};
-
-mongoose.connect(uri, options)
-    .then(() => {
-            console.log("Connexion à la base OK");
-        },
-        err => {
-            console.log('Erreur de connexion: ', err);
-        });
-
-// Pour accepter les connexions cross-domain (CORS)
-app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    next();
+// MongoDB connection
+mongoose.connect('mongodb+srv://dbReact:dbReactPassword@cluster0.ol0ko.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
 });
 
-// Pour les formulaires
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(bodyParser.json());
+// Routes
+const studentController = require('./controllers/studentController');
+const courseController = require('./controllers/courseController');
+const gradeController = require('./controllers/gradeController');
 
-let port = process.env.PORT || 8010;
+// Student routes
+app.get('/api/students', studentController.getAll);
+app.post('/api/students', studentController.create);
+app.delete('/api/students/:id', studentController.delete);
+app.put('/api/students/edit/:id', studentController.edit);
 
-// les routes
-const prefix = '/api';
+// Course routes
+app.get('/api/courses', courseController.getAll);
+app.post('/api/courses', courseController.create);
 
-app.route(prefix + '/students')
-    .get(student.getAll)
-    .post(student.create);
+// Grade routes
+app.get('/api/notes', gradeController.getAll);
+app.post('/api/notes', gradeController.create);
+app.delete('/api/notes/:id', gradeController.delete);
+app.put('/api/notes/:id', gradeController.edit);
 
-app.route(prefix + '/courses')
-    .get(course.getAll)
-    .post(course.create);
-
-app.route(prefix + '/grades')
-    .get(grade.getAll)
-    .post(grade.create);
-
-// On démarre le serveur
-app.listen(port, "0.0.0.0");
-console.log('Serveur démarré sur http://localhost:' + port);
-
-module.exports = app;
-
-
+const port = process.env.PORT || 8010;
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});
