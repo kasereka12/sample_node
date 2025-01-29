@@ -204,7 +204,8 @@ app.post("/auth/login", async (req, res) => {
                 id: user._id,
                 email: user.email,
                 name: user.displayName,
-                picture: user.picture
+                picture: user.picture,
+                role: user.role
             }
         });
 
