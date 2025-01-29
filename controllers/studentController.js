@@ -13,7 +13,8 @@ exports.create = async (req, res) => {
     try {
         const student = new Student(req.body);
         const savedStudent = await student.save();
-        res.status(201).json(savedStudent);
+        //res.status(201).json(savedStudent);
+        return savedStudent;
     } catch (err) {
         res.status(400).json({ message: "Impossible de créer l'étudiant", error: err });
     }
