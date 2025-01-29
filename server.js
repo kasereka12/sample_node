@@ -105,7 +105,8 @@ app.get("/auth/google/callback",
                 id: req.user._id,
                 name: req.user.displayName,
                 email: req.user.email,
-                picture: req.user.picture
+                picture: req.user.picture,
+                role: req.user.role
             };
 
             // Encoder les données en base64 pour une transmission sécurisée
@@ -324,6 +325,22 @@ app.get('/student', checkRole('STUDENT'), (req, res) => {
 
 
 //Users
+app.delete('/api/users/:id', async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const user = await User.findByIdAndDelete(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        }
+
+        res.status(200).json({ message: 'Utilisateur supprimé avec succès' });
+    } catch (error) {
+        console.error('Erreur lors de la suppression de l\'utilisateur:', error);
+        res.status(500).json({ message: 'Erreur interne du serveur' });
+    }
+});
+
 app.get('/api/users', async (req, res) => {
     try {
         const users = await User.find();
