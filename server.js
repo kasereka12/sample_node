@@ -296,10 +296,7 @@ app.get("/auth/logout", (req, res) => {
 
 
 // MongoDB connection
-mongoose.connect("mongodb+srv://dbReact:dbReactPassword@cluster0.ol0ko.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-});
+mongoose.connect("mongodb+srv://dbReact:dbReactPassword@cluster0.ol0ko.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
 
 // Middleware pour vérifier le rôle
 const checkRole = (role) => {
