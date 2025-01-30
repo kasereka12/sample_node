@@ -9,6 +9,7 @@ const bodyParser = require('body-parser');
 const passport = require('passport');
 const session = require('express-session');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const statsRoutes = require('./routes/stats');
 
 const app = express();
 app.use(cors({
@@ -366,6 +367,8 @@ app.get('/api/grades', gradeController.getAll);
 app.post('/api/grades', gradeController.create);
 app.delete('/api/grades/:id', gradeController.delete);
 app.put('/api/grades/:id', gradeController.edit);
+
+app.use('/api', statsRoutes);
 // Démarrage du serveur
 const port = process.env.PORT || 8010;
 app.listen(port, () => {
