@@ -1,5 +1,3 @@
-
-// models/Grade.js
 const mongoose = require('mongoose');
 
 const GradeSchema = new mongoose.Schema({
@@ -8,9 +6,7 @@ const GradeSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Student',
             required: true
-        },
-        firstname: String,
-        lastname: String
+        }
     },
     course: {
         type: String,
@@ -29,4 +25,3 @@ const GradeSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('Grade', GradeSchema);
-

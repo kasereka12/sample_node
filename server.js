@@ -251,6 +251,7 @@ app.post("/auth/register", async (req, res) => {
             const studentData = {
                 firstName,
                 lastName,
+                userId: newUser._id
             };
 
             // Appel de la méthode create du contrôleur StudentController pour enregistrer l'étudiant
@@ -297,10 +298,7 @@ app.get("/auth/logout", (req, res) => {
 
 
 // MongoDB connection
-mongoose.connect("mongodb+srv://dbReact:dbReactPassword@cluster0.ol0ko.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-});
+mongoose.connect("mongodb+srv://dbReact:dbReactPassword@cluster0.ol0ko.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
 
 // Middleware pour vérifier le rôle
 const checkRole = (role) => {
@@ -367,6 +365,8 @@ app.get('/api/grades', gradeController.getAll);
 app.post('/api/grades', gradeController.create);
 app.delete('/api/grades/:id', gradeController.delete);
 app.put('/api/grades/:id', gradeController.edit);
+app.get('/api/grades/:id', gradeController.getById);
+
 
 app.use('/api', statsRoutes);
 // Démarrage du serveur

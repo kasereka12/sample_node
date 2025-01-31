@@ -53,11 +53,25 @@ exports.getScolariteStats = async (req, res) => {
 // Statistiques pour l'étudiant
 exports.getStudentStats = async (req, res) => {
   try {
-    const studentId = req.user.id; // Récupérer l'ID de l'étudiant à partir du token JWT
-    const grades = await Grade.find({ studentId }).populate('courseId', 'name');
-    const courses = await Course.find({ students: studentId });
+    const userId = req.query.userId;
+
+    console.log(userId);
+
+    // Récupérer l'étudiant en utilisant userId
+    const student = await Student.findOne({ userId: userId }).populate('userId', 'displayName email');
+    // Vérifier si l'étudiant existe
+    if (!student) {
+      return res.status(404).json({ message: 'Étudiant non trouvé' });
+    }
+
+    // Récupérer les grades de l'étudiant en utilisant student._id
+    const grades = await Grade.find({ student: student._id }).populate('courseId', 'grade');
+
+    // Récupérer les cours associés à l'étudiant
+    const courses = await Course.find({ students: student._id });
 
     res.json({
+      student,
       grades,
       courses,
     });
