@@ -10,6 +10,10 @@ const passport = require('passport');
 const session = require('express-session');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const statsRoutes = require('./routes/stats');
+// Routes
+const studentController = require('./controllers/studentController');
+const courseController = require('./controllers/courseController');
+const gradeController = require('./controllers/gradeController');
 
 const app = express();
 app.use(cors({
@@ -68,6 +72,17 @@ passport.use(new GoogleStrategy({
                 role: 'STUDENT'  // Par défaut, tous les utilisateurs auront le rôle "STUDENT"
             });
         }
+        // Créer l'étudiant dans la table Student
+        const studentData = {
+            userId: user._id, // Associe l'étudiant à l'utilisateur
+            firstName: profile.name.givenName,
+            lastName: profile.name.familyName,
+            email: profile.emails[0].value,
+            picture: profile.photos[0].value,
+        };
+
+        const student = await studentController.creategoogle(studentData);
+
 
         done(null, user);
     } catch (error) {
@@ -109,6 +124,7 @@ app.get("/auth/google/callback",
                 picture: req.user.picture,
                 role: req.user.role
             };
+
 
             // Encoder les données en base64 pour une transmission sécurisée
             const encodedToken = Buffer.from(token).toString('base64');
@@ -218,10 +234,7 @@ app.post("/auth/login", async (req, res) => {
         });
     }
 });
-// Routes
-const studentController = require('./controllers/studentController');
-const courseController = require('./controllers/courseController');
-const gradeController = require('./controllers/gradeController');
+
 app.post("/auth/register", async (req, res) => {
     const { email, password, username, role, firstName, lastName } = req.body;
 

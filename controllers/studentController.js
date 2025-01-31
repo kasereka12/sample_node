@@ -8,6 +8,18 @@ exports.getAll = async (req, res) => {
         res.status(500).json({ message: "Erreur lors de la récupération des étudiants", error: err });
     }
 };
+// Dans studentController.js
+
+exports.creategoogle = async (studentData) => {
+    try {
+        const student = new Student(studentData);
+        const savedStudent = await student.save();
+        return savedStudent;
+    } catch (err) {
+        throw new Error('Impossible de créer l\'étudiant', err);
+    }
+};
+
 
 exports.create = async (req, res) => {
     try {
