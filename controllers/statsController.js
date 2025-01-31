@@ -77,30 +77,51 @@ exports.getAdminStats = async (req, res) => {
 
 // 📊 Statistiques pour le service scolarité
 exports.getScolariteStats = async (req, res) => {
-  try {
-    const students = await Student.find().populate('userId', 'displayName email');
-    const courses = await Course.find();
+    try {
+      const students = await Student.find().populate('userId', 'displayName email');
+      const courses = await Course.find();
+  
+      // Statistiques par matière avec moyenne, nombre total de notes, meilleure et pire note
+      const gradesByCourse = await Grade.aggregate([
+        {
+          $group: {
+            _id: "$course",
+            avgGrade: { $avg: "$grade" },
+            totalGrades: { $sum: 1 },
+            maxGrade: { $max: "$grade" },
+            minGrade: { $min: "$grade" }
+          }
+        },
+        {
+          $lookup: {
+            from: "courses", // Collection MongoDB des cours
+            localField: "_id",
+            foreignField: "_id",
+            as: "courseInfo"
+          }
+        },
+        { $unwind: "$courseInfo" }
+      ]);
 
-    // Moyenne des notes par matière
-    const gradesByCourse = await Grade.aggregate([
-      {
-        $group: {
-          _id: "$course",
-          avgGrade: { $avg: "$grade" },
-          totalGrades: { $sum: 1 }
-        }
-      }
-    ]).populate('_id', 'name'); // Récupère le nom du cours
-
-    res.json({
-      totalStudents: students.length,
-      totalCourses: courses.length,
-      gradesByCourse
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
-  }
-};
+      console.log(gradesByCourse);
+  
+      res.json({
+        totalStudents: students.length,
+        totalCourses: courses.length,
+        gradesByCourse: gradesByCourse.map(course => ({
+          courseId: course._id,
+          courseName: course.courseInfo.name,
+          avgGrade: course.avgGrade.toFixed(2),
+          totalGrades: course.totalGrades,
+          maxGrade: course.maxGrade,
+          minGrade: course.minGrade
+        }))
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Erreur serveur", error: error.message });
+    }
+  };
+  
 
 // 📊 Statistiques pour un étudiant spécifique
 exports.getStudentStats = async (req, res) => {
