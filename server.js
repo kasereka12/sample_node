@@ -61,29 +61,49 @@ passport.use(new GoogleStrategy({
     callbackURL: "http://localhost:8010/auth/google/callback"
 }, async (accessToken, refreshToken, profile, done) => {
     try {
+        // Vérifier si l'utilisateur existe déjà dans la table User
         let user = await User.findOne({ googleId: profile.id });
 
         if (!user) {
+            // Si l'utilisateur n'existe pas, on le crée
             user = await User.create({
                 googleId: profile.id,
                 displayName: profile.displayName,
                 email: profile.emails[0].value,
                 picture: profile.photos[0].value,
-                role: 'STUDENT'  // Par défaut, tous les utilisateurs auront le rôle "STUDENT"
+                role: 'STUDENT'  // Rôle par défaut
             });
+
+            // Créer un étudiant dans la table Student
+            const studentData = {
+                userId: user._id, // Associer l'étudiant à l'utilisateur
+                firstName: profile.name.givenName,
+                lastName: profile.name.familyName,
+                email: profile.emails[0].value,
+                picture: profile.photos[0].value,
+            };
+
+            // Appeler le contrôleur de création d'étudiant
+            const student = await studentController.creategoogle(studentData);
+        } else {
+            // Si l'utilisateur existe déjà, vérifier s'il a un étudiant associé
+            let student = await studentController.findEtudiant(user._id);  // Utilise la méthode findEtudiant
+            if (!student) {
+                // Si l'utilisateur n'a pas d'étudiant associé, on en crée un
+                const studentData = {
+                    userId: user._id,  // Lier l'étudiant à l'utilisateur
+                    firstName: profile.name.givenName,
+                    lastName: profile.name.familyName,
+                    email: profile.emails[0].value,
+                    picture: profile.photos[0].value,
+                };
+
+                // Créer un étudiant
+                student = await studentController.creategoogle(studentData);
+            }
         }
-        // Créer l'étudiant dans la table Student
-        const studentData = {
-            userId: user._id, // Associe l'étudiant à l'utilisateur
-            firstName: profile.name.givenName,
-            lastName: profile.name.familyName,
-            email: profile.emails[0].value,
-            picture: profile.photos[0].value,
-        };
 
-        const student = await studentController.creategoogle(studentData);
-
-
+        // Passer l'utilisateur au callback pour l'authentification
         done(null, user);
     } catch (error) {
         done(error, null);
