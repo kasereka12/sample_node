@@ -1,15 +1,17 @@
-
 // controllers/gradeController.js 
 const Grade = require('../model/Grades');
-const mongoose = require('mongoose');
-const StudentController = require('./studentController');  // Importe studentController
+const Student = require('../model/students');
+const Course = require('../model/Course');
 
 exports.getAll = async (req, res) => {
     try {
-        const grades = await Grade.find().populate('student.id', 'firstName lastName');
+        const grades = await Grade.find()
+            .populate('student', 'firstName lastName')  // Correction ici
+            .populate('course', 'name'); // Ajout pour afficher le nom du cours
+
         res.status(200).json(grades);
     } catch (err) {
-        res.status(500).json({ message: 'Erreur lors de la récupération des notes', error: err });
+        res.status(500).json({ message: 'Erreur lors de la récupération des notes', error: err.message });
     }
 };
 
@@ -17,15 +19,19 @@ exports.create = async (req, res) => {
     try {
         const { student, course, grade } = req.body;
 
-        // Ensure student ID exists
-        if (!student || !student.id) {
-            return res.status(400).json({ message: 'Student ID is required' });
+        // Vérifier si l'étudiant et le cours existent
+        const existingStudent = await Student.findById(student);
+        const existingCourse = await Course.findById(course);
+
+        if (!existingStudent) {
+            return res.status(400).json({ message: 'Student ID is invalid' });
+        }
+        if (!existingCourse) {
+            return res.status(400).json({ message: 'Course ID is invalid' });
         }
 
         const newGrade = new Grade({
-            student: {
-                id: student.id
-            },
+            student,
             course,
             grade
         });
@@ -33,7 +39,7 @@ exports.create = async (req, res) => {
         const savedGrade = await newGrade.save();
         res.status(201).json(savedGrade);
     } catch (err) {
-        res.status(400).json({ message: 'Impossible de créer la note', error: err });
+        res.status(400).json({ message: 'Impossible de créer la note', error: err.message });
     }
 };
 
@@ -45,7 +51,7 @@ exports.delete = async (req, res) => {
         }
         res.status(200).json({ message: 'Note supprimée avec succès' });
     } catch (err) {
-        res.status(500).json({ message: 'Erreur serveur lors de la suppression', error: err });
+        res.status(500).json({ message: 'Erreur serveur lors de la suppression', error: err.message });
     }
 };
 
@@ -53,15 +59,24 @@ exports.edit = async (req, res) => {
     try {
         const { student, course, grade } = req.body;
 
+        // Vérifier si l'étudiant et le cours existent avant la mise à jour
+        if (student) {
+            const existingStudent = await Student.findById(student);
+            if (!existingStudent) {
+                return res.status(400).json({ message: 'Student ID is invalid' });
+            }
+        }
+
+        if (course) {
+            const existingCourse = await Course.findById(course);
+            if (!existingCourse) {
+                return res.status(400).json({ message: 'Course ID is invalid' });
+            }
+        }
+
         const updatedGrade = await Grade.findByIdAndUpdate(
             req.params.id,
-            {
-                student: {
-                    id: student.id
-                },
-                course,
-                grade
-            },
+            { student, course, grade },
             { new: true }
         );
 
@@ -71,27 +86,16 @@ exports.edit = async (req, res) => {
 
         res.status(200).json(updatedGrade);
     } catch (err) {
-        res.status(500).json({ message: 'Erreur lors de la mise à jour', error: err });
+        res.status(500).json({ message: 'Erreur lors de la mise à jour', error: err.message });
     }
 };
 
 exports.getById = async (req, res) => {
     try {
-        const userId = req.params.id;
+        const grade = await Grade.findById(req.params.id)
+            .populate('student', 'firstName lastName')  // Correction ici
+            .populate('course', 'name'); // Ajout ici
 
-        // Récupérer l'étudiant en utilisant userId
-        const student = await StudentController.getStudentById(userId);
-        console.log('Étudiant trouvé :', student);
-
-        // Vérifier si l'étudiant existe avant de rechercher les notes
-        if (!student) {
-            return res.status(404).json({ message: 'Étudiant non trouvé' });
-        }
-
-        // Recherche de la note de l'étudiant par son ID
-        const grade = await Grade.findOne({ student: student._id }).populate('student', 'firstName lastName');
-
-        // Si aucune note n'est trouvée, renvoyer un tableau vide au lieu de 404
         if (!grade) {
             console.log('Aucune note trouvée pour l\'étudiant');
             return res.status(200).json({ message: 'Aucune note disponible pour cet étudiant' }); // Utilise un message plus descriptif
@@ -100,8 +104,6 @@ exports.getById = async (req, res) => {
         // Retourner la note si trouvée
         res.status(200).json(grade);
     } catch (err) {
-        console.error('Erreur lors de la récupération de la note:', err);
         res.status(500).json({ message: 'Erreur lors de la récupération de la note', error: err.message });
     }
 };
-
