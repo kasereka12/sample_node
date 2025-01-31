@@ -309,9 +309,10 @@ app.get("/auth/logout", (req, res) => {
     });
 });
 
+const mongoURI = process.env.MONGO_URI;
 
 // MongoDB connection
-mongoose.connect("mongodb+srv://dbReact:dbReactPassword@cluster0.ol0ko.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
+mongoose.connect(mongoURI);
 
 // Middleware pour vérifier le rôle
 const checkRole = (role) => {
