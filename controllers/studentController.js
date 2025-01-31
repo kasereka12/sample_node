@@ -8,6 +8,16 @@ exports.getAll = async (req, res) => {
         res.status(500).json({ message: "Erreur lors de la récupération des étudiants", error: err });
     }
 };
+exports.findEtudiant = async (userId) => {
+    try {
+        // Recherche un étudiant avec un userId spécifique
+        const student = await Student.findOne({ userId });
+        return student; // Retourne l'étudiant trouvé ou null si aucun étudiant n'est trouvé
+    } catch (error) {
+        throw new Error('Erreur lors de la recherche de l\'étudiant');
+    }
+};
+
 // Dans studentController.js
 
 exports.creategoogle = async (studentData) => {
