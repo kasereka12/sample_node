@@ -72,3 +72,15 @@ exports.edit = async (req, res) => {
         res.status(500).json({ message: 'Erreur lors de la mise à jour', error: err });
     }
 };
+exports.getById = async (req, res) => {
+    try {
+        const grade = await Grade.findById(req.params.id).populate('student.id', 'firstName lastName');
+        if (!grade) {
+            return res.status(404).json({ message: 'Note non trouvée' });
+        }
+        res.status(200).json(grade);
+    } catch (err) {
+        res.status(500).json({ message: 'Erreur lors de la récupération de la note', error: err });
+    }
+};
+

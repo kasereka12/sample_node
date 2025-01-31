@@ -251,6 +251,7 @@ app.post("/auth/register", async (req, res) => {
             const studentData = {
                 firstName,
                 lastName,
+                userId: newUser._id
             };
 
             // Appel de la méthode create du contrôleur StudentController pour enregistrer l'étudiant
@@ -364,6 +365,8 @@ app.get('/api/grades', gradeController.getAll);
 app.post('/api/grades', gradeController.create);
 app.delete('/api/grades/:id', gradeController.delete);
 app.put('/api/grades/:id', gradeController.edit);
+app.get('/api/grades/:id', gradeController.getById);
+
 
 app.use('/api', statsRoutes);
 // Démarrage du serveur
