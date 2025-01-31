@@ -2,14 +2,13 @@ const mongoose = require('mongoose');
 
 const GradeSchema = new mongoose.Schema({
     student: {
-        id: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Student',
-            required: true
-        }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Student',
+        required: true
     },
     course: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course',
         required: true
     },
     grade: {
