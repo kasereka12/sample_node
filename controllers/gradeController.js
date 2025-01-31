@@ -1,6 +1,8 @@
 
 // controllers/gradeController.js 
 const Grade = require('../model/Grades');
+const mongoose = require('mongoose');
+const StudentController = require('./studentController');  // Importe studentController
 
 exports.getAll = async (req, res) => {
     try {
@@ -72,15 +74,34 @@ exports.edit = async (req, res) => {
         res.status(500).json({ message: 'Erreur lors de la mise à jour', error: err });
     }
 };
+
 exports.getById = async (req, res) => {
     try {
-        const grade = await Grade.findById(req.params.id).populate('student.id', 'firstName lastName');
-        if (!grade) {
-            return res.status(404).json({ message: 'Note non trouvée' });
+        const userId = req.params.id;
+
+        // Récupérer l'étudiant en utilisant userId
+        const student = await StudentController.getStudentById(userId);
+        console.log('Étudiant trouvé :', student);
+
+        // Vérifier si l'étudiant existe avant de rechercher les notes
+        if (!student) {
+            return res.status(404).json({ message: 'Étudiant non trouvé' });
         }
+
+        // Recherche de la note de l'étudiant par son ID
+        const grade = await Grade.findOne({ student: student._id }).populate('student', 'firstName lastName');
+
+        // Si aucune note n'est trouvée, renvoyer un tableau vide au lieu de 404
+        if (!grade) {
+            console.log('Aucune note trouvée pour l\'étudiant');
+            return res.status(200).json({ message: 'Aucune note disponible pour cet étudiant' }); // Utilise un message plus descriptif
+        }
+
+        // Retourner la note si trouvée
         res.status(200).json(grade);
     } catch (err) {
-        res.status(500).json({ message: 'Erreur lors de la récupération de la note', error: err });
+        console.error('Erreur lors de la récupération de la note:', err);
+        res.status(500).json({ message: 'Erreur lors de la récupération de la note', error: err.message });
     }
 };
 

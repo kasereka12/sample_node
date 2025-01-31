@@ -365,7 +365,7 @@ app.get('/api/grades', gradeController.getAll);
 app.post('/api/grades', gradeController.create);
 app.delete('/api/grades/:id', gradeController.delete);
 app.put('/api/grades/:id', gradeController.edit);
-app.get('/api/grades/:id', gradeController.getById);
+app.get('/api/gradesstudents/:id', gradeController.getById);
 
 
 app.use('/api', statsRoutes);

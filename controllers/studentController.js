@@ -47,3 +47,11 @@ exports.edit = async (req, res) => {
         res.status(500).json({ message: "Erreur lors de la mise à jour", error: err });
     }
 };
+exports.getStudentById = async (userId) => {
+    try {
+        const student = await Student.findOne({ userId }).populate('userId', 'displayName email');
+        return student;
+    } catch (error) {
+        throw new Error('Erreur lors de la récupération de l\'étudiant : ' + error.message);
+    }
+};

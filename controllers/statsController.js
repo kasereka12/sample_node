@@ -55,7 +55,6 @@ exports.getStudentStats = async (req, res) => {
   try {
     const userId = req.query.userId;
 
-    console.log(userId);
 
     // Récupérer l'étudiant en utilisant userId
     const student = await Student.findOne({ userId: userId }).populate('userId', 'displayName email');
