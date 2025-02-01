@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
         unique: true,
         sparse: true // Permet d'éviter les conflits sur les valeurs vides
     },
-     displayName: String,
+    displayName: String,
     email: { type: String, unique: true },
     picture: String,
     role: {
@@ -23,10 +23,14 @@ const userSchema = new mongoose.Schema({
 
 // Middleware pour hacher le mot de passe avant de l'enregistrer
 userSchema.pre('save', async function (next) {
-    if (this.isModified('password')) {
-        this.password = await bcrypt.hash(this.password, 10);
+    try {
+        if (this.isModified('password') && this.password) {  // On vérifie que le mot de passe existe et a été modifié
+            this.password = await bcrypt.hash(this.password, 10); // Hachage du mot de passe avec un salt de 10 tours
+        }
+        next();
+    } catch (error) {
+        next(error); // Si erreur, on passe à l'erreur de middleware
     }
-    next();
 });
 
 module.exports = mongoose.model('User', userSchema);

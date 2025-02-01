@@ -88,6 +88,7 @@ passport.use(new GoogleStrategy({
         } else {
             // Si l'utilisateur existe déjà, vérifier s'il a un étudiant associé
             let student = await studentController.findEtudiant(user._id);  // Utilise la méthode findEtudiant
+
             if (!student) {
                 // Si l'utilisateur n'a pas d'étudiant associé, on en crée un
                 const studentData = {
@@ -388,11 +389,14 @@ app.get('/api/users', async (req, res) => {
 app.get('/api/students', studentController.getAll);
 app.post('/api/students', studentController.create);
 app.delete('/api/students/:id', studentController.delete);
-app.put('/api/students/edit/:id', studentController.edit);
+app.put('/api/students/:id', studentController.edit);
 
 // Course routes
 app.get('/api/courses', courseController.getAll);
 app.post('/api/courses', courseController.create);
+
+app.put('/api/courses/:id', courseController.edit);
+app.delete('/api/courses/:id', courseController.delete);
 
 // Grade routes
 app.get('/api/grades', gradeController.getAll);

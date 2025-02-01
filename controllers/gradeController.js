@@ -9,6 +9,7 @@ exports.getAll = async (req, res) => {
             .populate('student', 'firstName lastName')  // Correction ici
             .populate('course', 'name'); // Ajout pour afficher le nom du cours
 
+
         res.status(200).json(grades);
     } catch (err) {
         res.status(500).json({ message: 'Erreur lors de la récupération des notes', error: err.message });
@@ -35,6 +36,8 @@ exports.create = async (req, res) => {
             course,
             grade
         });
+
+        console.log(newGrade);
 
         const savedGrade = await newGrade.save();
         res.status(201).json(savedGrade);
