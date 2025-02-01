@@ -1,8 +1,8 @@
 # Utiliser l'image officielle Node.js
-FROM node:20
+FROM node:20-alpine
 
 # Définir le répertoire de travail
-WORKDIR /sample_node
+WORKDIR /app
 
 # Copier les fichiers package.json et package-lock.json
 COPY package*.json ./
@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Exposer le port de l'API (par défaut 3000)
-EXPOSE 8010
+EXPOSE 3000
 
 # Démarrer le serveur
 CMD ["node", "server.js"]
