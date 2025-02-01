@@ -79,17 +79,15 @@ exports.delete = async (req, res) => {
 };
 exports.edit = async (req, res) => {
     try {
-        const { firstName, lastName, age, email, phone, isActive } = req.body;
+        const { firstName, lastName, age, email, telephone, isActive } = req.body;
 
-        // Ensure all required fields are present
-        if (!firstName || !lastName || !email || !phone || age === undefined) {
+        if (!firstName || !lastName || !email || !telephone || age === undefined) {
             return res.status(400).json({ message: "Tous les champs sont obligatoires." });
         }
 
-        // Update the student with the provided data
         const student = await Student.findByIdAndUpdate(
             req.params.id,
-            { firstName, lastName, age, email, phone, isActive },
+            { firstName, lastName, age, email, telephone, isActive },
             { new: true }
         );
 

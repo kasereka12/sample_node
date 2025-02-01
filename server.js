@@ -389,7 +389,7 @@ app.get('/api/users', async (req, res) => {
 app.get('/api/students', studentController.getAll);
 app.post('/api/students', studentController.create);
 app.delete('/api/students/:id', studentController.delete);
-app.put('/api/students/edit/:id', studentController.edit);
+app.put('/api/students/:id', studentController.edit);
 
 // Course routes
 app.get('/api/courses', courseController.getAll);
